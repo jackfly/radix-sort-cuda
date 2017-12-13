@@ -13,7 +13,7 @@
 
 #include "sort.h"
 #include "utils.h"
-
+using namespace std;
 void cpu_sort(unsigned int* h_out, unsigned int* h_in, size_t len)
 {
     for (int i = 0; i < len; ++i)
