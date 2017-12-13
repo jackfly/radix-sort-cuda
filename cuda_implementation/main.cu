@@ -101,7 +101,7 @@ int main()
         i = i + 2;
         int num = pow(2,i);
         int linecount = 0;
-        string filename = "../RandomNumbers/" + to_string(i) + ".txt";
+        string filename = "../RandomNumbers/" + std::to_string(i) + ".txt";
         unsigned int* numbers = new int[num];
         //int numbers[num];
         //Create an input file stream
