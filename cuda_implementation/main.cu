@@ -102,7 +102,7 @@ int main()
         int num = pow(2,i);
         int linecount = 0;
         string filename = "../RandomNumbers/" + std::to_string(i) + ".txt";
-        unsigned int* numbers = new int[num];
+        unsigned int* numbers = new unsigned int[num];
         //int numbers[num];
         //Create an input file stream
         fstream file(filename);
