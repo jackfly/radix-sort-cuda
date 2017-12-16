@@ -26,32 +26,33 @@ void cpu_sort(unsigned int* h_out, unsigned int* h_in, size_t len)
 
 void test_cpu_vs_gpu(unsigned int* h_in, unsigned int num_elems)
 {
-    std::clock_t start;
+    //std::clock_t start;
 
-    unsigned int* h_out_cpu = new unsigned int[num_elems];
+    //unsigned int* h_out_cpu = new unsigned int[num_elems];
     unsigned int* h_out_gpu = new unsigned int[num_elems];
 
-    start = std::clock();
-    cpu_sort(h_out_cpu, h_in, num_elems);
-    double cpu_duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-    std::cout << "CPU time: " << cpu_duration << " s" << std::endl;
+    //start = std::clock();
+    //cpu_sort(h_out_cpu, h_in, num_elems);
+    //double cpu_duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+    //std::cout << "CPU time: " << cpu_duration << " s" << std::endl;
     
     unsigned int* d_in;
     unsigned int* d_out;
     checkCudaErrors(cudaMalloc(&d_in, sizeof(unsigned int) * num_elems));
     checkCudaErrors(cudaMalloc(&d_out, sizeof(unsigned int) * num_elems));
     checkCudaErrors(cudaMemcpy(d_in, h_in, sizeof(unsigned int) * num_elems, cudaMemcpyHostToDevice));
-    start = std::clock();
+    //start = std::clock();
     radix_sort(d_out, d_in, num_elems);
-    double gpu_duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-    std::cout << "GPU time: " << gpu_duration << " s" << std::endl;
+    //double gpu_duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+    //std::cout << "GPU time: " << gpu_duration << " s" << std::endl;
     checkCudaErrors(cudaMemcpy(h_out_gpu, d_out, sizeof(unsigned int) * num_elems, cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaFree(d_out));
     checkCudaErrors(cudaFree(d_in));
 
     // Calculate GPU / CPU speedup
-    std::cout << "Speedup: " << cpu_duration / gpu_duration << "x" << std::endl;
+    //std::cout << "Speedup: " << cpu_duration / gpu_duration << "x" << std::endl;
 
+/*
     // Check for any mismatches between outputs of CPU and GPU
     bool match = true;
     int index_diff = 0;
@@ -87,15 +88,15 @@ void test_cpu_vs_gpu(unsigned int* h_in, unsigned int num_elems)
     	std::cout << h_out_gpu[index_diff + i] << ", ";
         }
         std::cout << std::endl;
-    }
+    }*/
     
     delete[] h_out_gpu;
-    delete[] h_out_cpu;
+   // delete[] h_out_cpu;
 }
 
 int main()
 {
-
+    struct timespec start, stop;
     for (int i = 0; i <= 18; ++i)
     {
         i = i + 2;
@@ -114,8 +115,12 @@ int main()
         //Close the file stream
         file.close();
 
-        std::cout << "*****Descending order*****" << std::endl;
+        //std::cout << "*****Descending order*****" << std::endl;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
         test_cpu_vs_gpu(numbers, num);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
+        double dt = (stop.tv_sec - start.tv_sec) * 1e6 + (stop.tv_nsec - start.tv_nsec) / 1e3;    // in microseconds
+        printf("@time of CUDA run:\t\t\t[%.3f] microseconds\n", dt);
 
         delete[] numbers;
 
