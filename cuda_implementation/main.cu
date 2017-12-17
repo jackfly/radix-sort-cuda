@@ -1,3 +1,5 @@
+// CUDA implementation: RadixSort
+// Final Project
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
@@ -15,23 +17,22 @@
 #include "utils.h"
 using namespace std;
 
-void test_cpu_vs_gpu(unsigned int* h_in, unsigned int num_elems)
+void radixsort_gpu(unsigned int* h_in, unsigned int num)
 {
-    unsigned int* h_out_gpu = new unsigned int[num_elems];
+    unsigned int* h_out_gpu = new unsigned int[num];
     
     unsigned int* d_in;
     unsigned int* d_out;
-    checkCudaErrors(cudaMalloc(&d_in, sizeof(unsigned int) * num_elems));
-    checkCudaErrors(cudaMalloc(&d_out, sizeof(unsigned int) * num_elems));
-    checkCudaErrors(cudaMemcpy(d_in, h_in, sizeof(unsigned int) * num_elems, cudaMemcpyHostToDevice));
+    cudaMalloc(&d_in, sizeof(unsigned int) * num);
+    cudaMalloc(&d_out, sizeof(unsigned int) * num);
+    cudaMemcpy(d_in, h_in, sizeof(unsigned int) * num, cudaMemcpyHostToDevice);
 
-    radix_sort(d_out, d_in, num_elems);
+    radix_sort(d_out, d_in, num);
 
-    checkCudaErrors(cudaMemcpy(h_out_gpu, d_out, sizeof(unsigned int) * num_elems, cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaFree(d_out));
-    checkCudaErrors(cudaFree(d_in));
+    cudaMemcpy(h_out_gpu, d_out, sizeof(unsigned int) * num, cudaMemcpyDeviceToHost);
+    cudaFree(d_out);
+    cudaFree(d_in);
 
-    
     delete[] h_out_gpu;
 }
 
@@ -57,7 +58,7 @@ int main()
         file.close();
 
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-        test_cpu_vs_gpu(numbers, num);
+        radixsort_gpu(numbers, num);
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
         double dt = (stop.tv_sec - start.tv_sec) * 1e6 + (stop.tv_nsec - start.tv_nsec) / 1e3;    // in microseconds
         printf("@time of CUDA run:\t\t\t[%.3f] microseconds\n", dt);

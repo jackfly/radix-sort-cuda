@@ -19,24 +19,6 @@ __global__ void gpu_radix_sort_local(unsigned int* d_out_sorted,
     unsigned int d_in_len,
     unsigned int max_elems_per_block)
 {
-    // need shared memory array for:
-    // - block's share of the input data (local sort will be put here too)
-    // - mask outputs
-    // - scanned mask outputs
-    // - merged scaned mask outputs ("local prefix sum")
-    // - local sums of scanned mask outputs
-    // - scanned local sums of scanned mask outputs
-
-    // for all radix combinations:
-    //  build mask output for current radix combination
-    //  scan mask ouput
-    //  store needed value from current prefix sum array to merged prefix sum array
-    //  store total sum of mask output (obtained from scan) to global block sum array
-    // calculate local sorted address from local prefix sum and scanned mask output's total sums
-    // shuffle input block according to calculated local sorted addresses
-    // shuffle local prefix sums according to calculated local sorted addresses
-    // copy locally sorted array back to global memory
-    // copy local prefix sum array back to global memory
 
     extern __shared__ unsigned int shmem[];
     unsigned int* s_data = shmem;
@@ -49,7 +31,6 @@ __global__ void gpu_radix_sort_local(unsigned int* d_out_sorted,
 
     unsigned int thid = threadIdx.x;
 
-    // Copy block's portion of global input data to shared memory
     unsigned int cpy_idx = max_elems_per_block * blockIdx.x + thid;
     if (cpy_idx < d_in_len)
         s_data[thid] = d_in[cpy_idx];
@@ -58,10 +39,6 @@ __global__ void gpu_radix_sort_local(unsigned int* d_out_sorted,
 
     __syncthreads();
 
-    // To extract the correct 2 bits, we first shift the number
-    //  to the right until the correct 2 bits are in the 2 LSBs,
-    //  then mask on the number with 11 (3) to remove the bits
-    //  on the left
     unsigned int t_data = s_data[thid];
     unsigned int t_2bit_extract = (t_data >> input_shift_width) & 3;
 
@@ -69,8 +46,7 @@ __global__ void gpu_radix_sort_local(unsigned int* d_out_sorted,
     {
         // Zero out s_mask_out
         s_mask_out[thid] = 0;
-        // If CONFLICT_FREE_OFFSET is used, shared memory
-        //  must be a few more than 2 * blockDim.x
+        
         if (thid + max_elems_per_block < s_mask_out_len)
             s_mask_out[thid + max_elems_per_block] = 0;
         __syncthreads();
@@ -191,11 +167,6 @@ __global__ void gpu_glbl_shuffle(unsigned int* d_out,
     unsigned int d_in_len,
     unsigned int max_elems_per_block)
 {
-    // get d = digit
-    // get n = blockIdx
-    // get m = local prefix sum array value
-    // calculate global position = P_d[n] + m
-    // copy input element to final position in d_out
 
     unsigned int thid = threadIdx.x;
     unsigned int cpy_idx = max_elems_per_block * blockIdx.x + thid;
@@ -212,8 +183,6 @@ __global__ void gpu_glbl_shuffle(unsigned int* d_out,
     }
 }
 
-// An attempt at the gpu radix sort variant described in this paper:
-// https://vgc.poly.edu/~csilva/papers/cgf.pdf
 void radix_sort(unsigned int* const d_out,
     unsigned int* const d_in,
     unsigned int d_in_len)
@@ -221,10 +190,10 @@ void radix_sort(unsigned int* const d_out,
     unsigned int block_sz = MAX_BLOCK_SZ;
     unsigned int max_elems_per_block = block_sz;
     unsigned int grid_sz = d_in_len / max_elems_per_block;
-    // Take advantage of the fact that integer division drops the decimals
+    
     if (d_in_len % max_elems_per_block != 0)
         grid_sz += 1;
-
+    // initialize the prefix sum variable
     unsigned int* d_prefix_sums;
     unsigned int d_prefix_sums_len = d_in_len;
     checkCudaErrors(cudaMalloc(&d_prefix_sums, sizeof(unsigned int) * d_prefix_sums_len));
@@ -239,8 +208,6 @@ void radix_sort(unsigned int* const d_out,
     checkCudaErrors(cudaMalloc(&d_scan_block_sums, sizeof(unsigned int) * d_block_sums_len));
     checkCudaErrors(cudaMemset(d_scan_block_sums, 0, sizeof(unsigned int) * d_block_sums_len));
 
-    // shared memory consists of 3 arrays the size of the block-wise input
-    //  and 2 arrays the size of n in the current n-way split (4)
     unsigned int s_data_len = max_elems_per_block;
     unsigned int s_mask_out_len = max_elems_per_block + (max_elems_per_block / NUM_BANKS);
     unsigned int s_merged_scan_mask_out_len = max_elems_per_block;
@@ -266,12 +233,6 @@ void radix_sort(unsigned int* const d_out,
                                                                 d_in_len, 
                                                                 max_elems_per_block);
 
-        //unsigned int* h_test = new unsigned int[d_in_len];
-        //checkCudaErrors(cudaMemcpy(h_test, d_in, sizeof(unsigned int) * d_in_len, cudaMemcpyDeviceToHost));
-        //for (unsigned int i = 0; i < d_in_len; ++i)
-        //    std::cout << h_test[i] << " ";
-        //std::cout << std::endl;
-        //delete[] h_test;
 
         // scan global block sum array
         sum_scan_blelloch(d_scan_block_sums, d_block_sums, d_block_sums_len);
