@@ -196,17 +196,17 @@ void radix_sort(unsigned int* const d_out,
     // initialize the prefix sum variable
     unsigned int* d_prefix_sums;
     unsigned int d_prefix_sums_len = d_in_len;
-    checkCudaErrors(cudaMalloc(&d_prefix_sums, sizeof(unsigned int) * d_prefix_sums_len));
-    checkCudaErrors(cudaMemset(d_prefix_sums, 0, sizeof(unsigned int) * d_prefix_sums_len));
+    cudaMalloc(&d_prefix_sums, sizeof(unsigned int) * d_prefix_sums_len);
+    cudaMemset(d_prefix_sums, 0, sizeof(unsigned int) * d_prefix_sums_len);
 
     unsigned int* d_block_sums;
     unsigned int d_block_sums_len = 4 * grid_sz; // 4-way split
-    checkCudaErrors(cudaMalloc(&d_block_sums, sizeof(unsigned int) * d_block_sums_len));
-    checkCudaErrors(cudaMemset(d_block_sums, 0, sizeof(unsigned int) * d_block_sums_len));
+    cudaMalloc(&d_block_sums, sizeof(unsigned int) * d_block_sums_len);
+    cudaMemset(d_block_sums, 0, sizeof(unsigned int) * d_block_sums_len);
 
     unsigned int* d_scan_block_sums;
-    checkCudaErrors(cudaMalloc(&d_scan_block_sums, sizeof(unsigned int) * d_block_sums_len));
-    checkCudaErrors(cudaMemset(d_scan_block_sums, 0, sizeof(unsigned int) * d_block_sums_len));
+    cudaMalloc(&d_scan_block_sums, sizeof(unsigned int) * d_block_sums_len);
+    cudaMemset(d_scan_block_sums, 0, sizeof(unsigned int) * d_block_sums_len);
 
     unsigned int s_data_len = max_elems_per_block;
     unsigned int s_mask_out_len = max_elems_per_block + (max_elems_per_block / NUM_BANKS);
@@ -246,9 +246,9 @@ void radix_sort(unsigned int* const d_out,
                                                     d_in_len, 
                                                     max_elems_per_block);
     }
-    checkCudaErrors(cudaMemcpy(d_out, d_in, sizeof(unsigned int) * d_in_len, cudaMemcpyDeviceToDevice));
+    cudaMemcpy(d_out, d_in, sizeof(unsigned int) * d_in_len, cudaMemcpyDeviceToDevice);
 
-    checkCudaErrors(cudaFree(d_scan_block_sums));
-    checkCudaErrors(cudaFree(d_block_sums));
-    checkCudaErrors(cudaFree(d_prefix_sums));
+    cudaFree(d_scan_block_sums);
+    cudaFree(d_block_sums);
+    cudaFree(d_prefix_sums);
 }
