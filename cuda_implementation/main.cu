@@ -97,7 +97,7 @@ void test_cpu_vs_gpu(unsigned int* h_in, unsigned int num_elems)
 int main()
 {
     struct timespec start, stop;
-    for (int i = 0; i <= 18; ++i)
+    for (int i = 0; i <= 18;)
     {
         i = i + 2;
         int num = pow(2,i);
@@ -124,6 +124,6 @@ int main()
 
         delete[] numbers;
 
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
 }
