@@ -284,7 +284,7 @@ void sum_scan_blelloch(unsigned int* const d_out,
     unsigned int block_sz = MAX_BLOCK_SZ / 2;
     unsigned int max_elems_per_block = 2 * block_sz; // due to binary tree nature of algorithm
 
-
+    unsigned int grid_sz = numElems / max_elems_per_block;
     if (numElems % max_elems_per_block != 0) 
         grid_sz += 1;
 
