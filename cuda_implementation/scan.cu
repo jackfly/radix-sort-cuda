@@ -11,6 +11,7 @@
 #define CONFLICT_FREE_OFFSET(n) ((n) >> LOG_NUM_BANKS)
 #endif
 
+/*
 __global__
 void gpu_sum_scan_naive(unsigned int* const d_out,
     const unsigned int* const d_in,
@@ -30,7 +31,7 @@ void gpu_sum_scan_naive(unsigned int* const d_out,
         cdf_val = cdf_val + d_in[i];
     }
     d_out[d_hist_idx] = cdf_val;
-}
+}*/
 
 __global__
 void gpu_sum_scan_blelloch(unsigned int* const d_out,
@@ -259,7 +260,7 @@ void gpu_prescan(unsigned int* const d_out,
             d_out[cpy_idx + blockDim.x] = s_out[bi + CONFLICT_FREE_OFFSET(bi)];
     }
 }
-
+/*
 void sum_scan_naive(unsigned int* const d_out,
     const unsigned int* const d_in,
     const size_t numElems)
@@ -270,7 +271,7 @@ void sum_scan_naive(unsigned int* const d_out,
         gridSz += 1;
     cudaMemset(d_out, 0, numElems * sizeof(unsigned int));
     gpu_sum_scan_naive << <gridSz, blockSz >> >(d_out, d_in, numElems);
-}
+}*/
  
 void sum_scan_blelloch(unsigned int* const d_out,
     const unsigned int* const d_in,
