@@ -1,5 +1,6 @@
 // CUDA implementation: RadixSort
 // Final Project
+// Group 2
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
@@ -18,7 +19,7 @@ using namespace std;
 
 void radixsort_gpu(unsigned int* h_in, unsigned int num)
 {
-    unsigned int* h_out_gpu = new unsigned int[num];
+    unsigned int* out_gpu = new unsigned int[num];
     
     unsigned int* d_in;
     unsigned int* d_out;
@@ -28,11 +29,11 @@ void radixsort_gpu(unsigned int* h_in, unsigned int num)
 
     radix_sort(d_out, d_in, num);
 
-    cudaMemcpy(h_out_gpu, d_out, sizeof(unsigned int) * num, cudaMemcpyDeviceToHost);
+    cudaMemcpy(out_gpu, d_out, sizeof(unsigned int) * num, cudaMemcpyDeviceToHost);
     cudaFree(d_out);
     cudaFree(d_in);
 
-    delete[] h_out_gpu;
+    delete[] out_gpu;
 }
 
 int main()
