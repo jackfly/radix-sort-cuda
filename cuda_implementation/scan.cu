@@ -4,12 +4,8 @@
 #define NUM_BANKS 32
 #define LOG_NUM_BANKS 5
 
-#ifdef ZERO_BANK_CONFLICTS
-#define CONFLICT_FREE_OFFSET(n) \
-    ((n) >> NUM_BANKS + (n) >> (2 * LOG_NUM_BANKS))
-#else
 #define CONFLICT_FREE_OFFSET(n) ((n) >> LOG_NUM_BANKS)
-#endif
+// according to https://www.mimuw.edu.pl/~ps209291/kgkp/slides/scan.pdf
 
 
 __global__
@@ -73,7 +69,6 @@ void gpu_sum_scan_blelloch(unsigned int* const d_out,
     }
 
     // Copy last element (total sum of block) to block sums array
-    // Then, reset last element to operation's identity (sum, 0)
     if (threadIdx.x == 0)
     {
         d_block_sums[blockIdx.x] = s_out[r_idx];
@@ -143,8 +138,7 @@ void gpu_add_block_sums(unsigned int* const d_out,
 
 }
 
-// Modified version of Mark Harris' implementation of the Blelloch scan
-//  according to https://www.mimuw.edu.pl/~ps209291/kgkp/slides/scan.pdf
+
 __global__
 void gpu_prescan(unsigned int* const d_out,
     const unsigned int* const d_in,
@@ -273,9 +267,7 @@ void sum_scan_blelloch(unsigned int* const d_out,
                                                                     shmem_sz,
                                                                     max_elems_per_block);
 
-    // Sum scan total sums produced by each block
-    // Use basic implementation if number of total sums is <= 2 * block_sz
-    //  (This requires only one block to do the scan)
+
     if (grid_sz <= max_elems_per_block)
     {
         unsigned int* d_dummy_blocks_sums;
@@ -290,8 +282,7 @@ void sum_scan_blelloch(unsigned int* const d_out,
                                                                     max_elems_per_block);
         cudaFree(d_dummy_blocks_sums);
     }
-    // Else, recurse on this same function as you'll need the full-blown scan
-    //  for the block sums
+
     else
     {
         unsigned int* d_in_block_sums;
