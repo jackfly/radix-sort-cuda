@@ -124,7 +124,6 @@ __global__ void gpu_radix_sort_local(unsigned int* d_out_sorted,
     __syncthreads();
 
     // Scan mask output sums
-    // Just do a naive scan since the array is really small
     if (thid == 0)
     {
         unsigned int run_sum = 0;
@@ -232,7 +231,6 @@ void radix_sort(unsigned int* const d_out,
                                                                 d_in, 
                                                                 d_in_len, 
                                                                 max_elems_per_block);
-
 
         // scan global block sum array
         sum_scan_blelloch(d_scan_block_sums, d_block_sums, d_block_sums_len);

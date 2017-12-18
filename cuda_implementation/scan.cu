@@ -129,7 +129,6 @@ void gpu_add_block_sums(unsigned int* const d_out,
     unsigned int* const d_block_sums,
     const size_t numElems)
 {
-    //unsigned int glbl_t_idx = blockDim.x * blockIdx.x + threadIdx.x;
     unsigned int d_block_sum_val = d_block_sums[blockIdx.x];
 
     // Simple implementation's performance is not significantly (if at all)

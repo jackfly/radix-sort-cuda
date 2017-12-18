@@ -14,7 +14,7 @@
 #include <time.h>
 
 #include "sort.h"
-#include "utils.h"
+//#include "utils.h"
 using namespace std;
 
 void radixsort_gpu(unsigned int* h_in, unsigned int num)

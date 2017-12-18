@@ -6,7 +6,7 @@
 
 #include <cmath>
 
-#include "utils.h"
+//#include "utils.h"
 #include "timer.h"
 /*
 void sum_scan_naive(unsigned int* const d_out,
