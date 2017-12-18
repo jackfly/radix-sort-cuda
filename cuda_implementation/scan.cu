@@ -34,9 +34,8 @@ void gpu_sum_scan_blelloch(unsigned int* const d_out,
 
     __syncthreads();
 
-    // Reduce/Upsweep step
+    // Upsweep step
 
-    // 2^11 = 2048, the max amount of data a block can blelloch scan
     unsigned int max_steps = 11; 
 
     unsigned int r_idx = 0;
