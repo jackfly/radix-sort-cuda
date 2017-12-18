@@ -247,7 +247,6 @@ void radix_sort(unsigned int* const d_out,
                                                     max_elems_per_block);
     }
     cudaMemcpy(d_out, d_in, sizeof(unsigned int) * d_in_len, cudaMemcpyDeviceToDevice);
-
     cudaFree(d_scan_block_sums);
     cudaFree(d_block_sums);
     cudaFree(d_prefix_sums);
